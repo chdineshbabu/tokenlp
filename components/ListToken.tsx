@@ -5,7 +5,8 @@ import { TOKEN_2022_PROGRAM_ID, AccountLayout, getTokenMetadata } from '@solana/
 import { TokenAccountsFilter } from '@solana/web3.js';
 import { useRouter } from 'next/navigation';
 import Token from './Token';
-import { Link2Icon } from 'lucide-react';
+import { Link2Icon, Send } from 'lucide-react';
+import MintToken from './MintToken';
 
 export default function TokenList() {
     const router = useRouter()
@@ -37,7 +38,7 @@ export default function TokenList() {
                                 pubkey: account.pubkey.toBase58(),
                                 mint: mintAddress,
                                 amount: accountData.amount.toString(),
-                                logo: metadata?.uri||'/placeholder.svg',
+                                logo: metadata?.uri || '/placeholder.svg',
                                 name: metadata?.name || 'Token Name',
                                 symbol: metadata?.symbol || 'TOKEN',
                             };
@@ -66,6 +67,7 @@ export default function TokenList() {
                         <th className="border-b py-2 px-4">Name</th>
                         <th className="border-b py-2 px-4">Symbol</th>
                         <th className="border-b py-2 px-4">Amount</th>
+                        <th className="border-b py-2 px-4">MintTokens</th>
                         <th className="border-b py-2 px-4 text-right">Explore</th>
                     </tr>
                 </thead>
@@ -85,8 +87,9 @@ export default function TokenList() {
                                 </td>
                                 <td className="border-b py-2 px-4">{token.name}</td>
                                 <td className="border-b py-2 px-4">{token.symbol}</td>
-                                <td className="border-b py-2 px-4">{token.amount.toLocaleString()}</td>
-                                <td className="border-b py-2 px-4 text-right"><a className='flex justify-center items-center gap-2 border rounded-md ' href={`https://explorer.solana.com/address/${token.mint}?cluster=devnet`}
+                                <td className="border-b py-2 px-4">{token.amount.toLocaleString() / 1000000000}</td>
+                                <td className="border-b py-2 px-4 "><MintToken mintAddress={token.mint} />                               </td>
+                                <td className="border-b py-2 px-4 text-right"><a className='flex justify-center items-center text-blue-900 underline' href={`https://explorer.solana.com/address/${token.mint}?cluster=devnet`}
                                     target="_blank" >Link <Link2Icon /> </a></td>
                             </tr>
                         ))

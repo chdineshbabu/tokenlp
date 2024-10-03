@@ -4,6 +4,7 @@ import {
   createAssociatedTokenAccountInstruction,
   createInitializeMetadataPointerInstruction,
   createInitializeMintInstruction,
+  createMintToInstruction,
   ExtensionType,
   getAssociatedTokenAddress,
   getMintLen,
@@ -109,7 +110,22 @@ export default function Token({ onClose }) {
     ).blockhash;
     await wallet?.adapter.sendTransaction(associateTransaction, connection);
     setStatus("Successfully Token Created");
-    
+    const instruction = createMintToInstruction(
+      mintKeypair.publicKey,
+      associatedTokenAccount,
+      wallet?.adapter.publicKey,
+      initialSupply * 1000000000,
+      [],
+      TOKEN_2022_PROGRAM_ID
+    );
+    setStatus("Minting the Tokens.....");
+    const tokenMintTransaction = new Transaction().add(instruction);
+    await wallet?.adapter.sendTransaction(tokenMintTransaction, connection);
+
+    console.log(`Token created: ${mintKeypair.publicKey.toBase58()}`);
+    console.log(
+      `Associated Token Account: ${associatedTokenAccount.toBase58()}`
+    );
   }
   console.log(status);
   const handleCreateToken = async (e: React.FormEvent) => {
@@ -118,7 +134,7 @@ export default function Token({ onClose }) {
     await createToken();
     setLoader("success");
   };
-
+  
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-800 bg-opacity-50">
       {isCreating ? (
@@ -141,12 +157,14 @@ export default function Token({ onClose }) {
                   Created Successfully
                 </h1>
               </div>
-            ) : loader == 'fail'?<div className="flex flex-col items-center gap-5 justify-center">
-            <CircleAlert className="w-28 h-28 text-red-700" />
-            <h1 className="font-poppins text-xl text-red-800">
-              Oops! Something went wrong
-            </h1>
-          </div>:(
+            ) : loader == "fail" ? (
+              <div className="flex flex-col items-center gap-5 justify-center">
+                <CircleAlert className="w-28 h-28 text-red-700" />
+                <h1 className="font-poppins text-xl text-red-800">
+                  Oops! Something went wrong
+                </h1>
+              </div>
+            ) : (
               <Atom color="#151915" size="large" text={status} textColor="" />
             )}
           </div>
@@ -240,9 +258,8 @@ export default function Token({ onClose }) {
             <div className="mt-6">
               <button
                 type="submit"
-                className={`w-full px-4 py-2 font-bold dark:bg-black bg-white dark:text-white text-black rounded hover:scale-105 transition-all delay-75 ${
-                  isCreating ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`w-full px-4 py-2 font-bold dark:bg-black bg-white dark:text-white text-black rounded hover:scale-105 transition-all delay-75 ${isCreating ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 disabled={isCreating}
               >
                 {isCreating ? "Creating..." : "Create Token"}
