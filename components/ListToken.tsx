@@ -5,11 +5,12 @@ import { TOKEN_2022_PROGRAM_ID, AccountLayout, getTokenMetadata } from '@solana/
 import { TokenAccountsFilter } from '@solana/web3.js';
 import { useRouter } from 'next/navigation';
 import Token from './Token';
+import { Link2Icon } from 'lucide-react';
 
 export default function TokenList() {
     const router = useRouter()
     const [accounts, setAccounts] = useState([]);
-    const [isCreatePop,setIsCreatePop] = useState(false)
+    const [isCreatePop, setIsCreatePop] = useState(false)
     const { wallet } = useWallet();
     const { connection } = useConnection();
     const publicKey = wallet?.adapter.publicKey;
@@ -36,7 +37,7 @@ export default function TokenList() {
                                 pubkey: account.pubkey.toBase58(),
                                 mint: mintAddress,
                                 amount: accountData.amount.toString(),
-                                logo:'/placeholder.svg',
+                                logo: metadata?.uri||'/placeholder.svg',
                                 name: metadata?.name || 'Token Name',
                                 symbol: metadata?.symbol || 'TOKEN',
                             };
@@ -53,9 +54,9 @@ export default function TokenList() {
     return (
         <div className="container mx-auto py-10">
             <div className='flex justify-between items-end'>
-            <h1 className="text-xl font-bold mb-4">Your Token Accounts:</h1>
-            <button onClick={()=>setIsCreatePop(true)} className='p-2 px-4 my-4 bg-black rounded-lg hover:scale-105 transition-all delay-75 dark:bg-white text-white dark:text-black'>Create Token</button>
-                            
+                <h1 className="text-xl font-bold mb-4">Your Token Accounts:</h1>
+                <button onClick={() => setIsCreatePop(true)} className='p-2 px-4 my-4 bg-black rounded-lg hover:scale-105 transition-all delay-75 dark:bg-white text-white dark:text-black'>Create Token</button>
+
             </div>
             <table className="min-w-full">
                 <thead>
@@ -64,7 +65,8 @@ export default function TokenList() {
                         <th className="border-b py-2 px-4">Logo</th>
                         <th className="border-b py-2 px-4">Name</th>
                         <th className="border-b py-2 px-4">Symbol</th>
-                        <th className="border-b py-2 px-4 text-right">Amount</th>
+                        <th className="border-b py-2 px-4">Amount</th>
+                        <th className="border-b py-2 px-4 text-right">Explore</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -73,7 +75,7 @@ export default function TokenList() {
                             <tr key={token.pubkey} className="">
                                 <td className="border-b py-2 px-4 font-medium">{index + 1}</td>
                                 <td className="border-b py-2 px-4">
-                                    <Image
+                                    <img
                                         src={token.logo}
                                         alt={`${token.name} logo`}
                                         width={32}
@@ -83,22 +85,24 @@ export default function TokenList() {
                                 </td>
                                 <td className="border-b py-2 px-4">{token.name}</td>
                                 <td className="border-b py-2 px-4">{token.symbol}</td>
-                                <td className="border-b py-2 px-4 text-right">{token.amount.toLocaleString()}</td>
+                                <td className="border-b py-2 px-4">{token.amount.toLocaleString()}</td>
+                                <td className="border-b py-2 px-4 text-right"><a className='flex justify-center items-center gap-2 border rounded-md ' href={`https://explorer.solana.com/address/${token.mint}?cluster=devnet`}
+                                    target="_blank" >Link <Link2Icon /> </a></td>
                             </tr>
                         ))
                     ) : (
                         <tr>
                             <td colSpan={5} className="border-b py-2 px-4 text-center">
-                                No token accounts found.<br/>
-                                <button onClick={()=>setIsCreatePop(true)} className='p-2 px-4 my-4 bg-black rounded-lg hover:scale-105 transition-all delay-75 dark:bg-white text-white dark:text-black'>Create Token</button>
+                                No token accounts found.<br />
+                                <button onClick={() => setIsCreatePop(true)} className='p-2 px-4 my-4 bg-black rounded-lg hover:scale-105 transition-all delay-75 dark:bg-white text-white dark:text-black'>Create Token</button>
                             </td>
                         </tr>
                     )}
                 </tbody>
             </table>
             {isCreatePop && (
-        <Token onClose={()=>setIsCreatePop(false)}/>
-      )}
+                <Token onClose={() => setIsCreatePop(false)} />
+            )}
         </div>
     );
 }

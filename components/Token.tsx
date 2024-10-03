@@ -1,25 +1,37 @@
-'use client'
+"use client";
 
-import { createAssociatedTokenAccountInstruction, createInitializeMetadataPointerInstruction, createInitializeMintInstruction, ExtensionType, getAssociatedTokenAddress, getMintLen, LENGTH_SIZE, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, TYPE_SIZE } from '@solana/spl-token'
-import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { Keypair, SystemProgram, Transaction } from '@solana/web3.js'
-import { createInitializeInstruction, pack } from '@solana/spl-token-metadata';
+import {
+  createAssociatedTokenAccountInstruction,
+  createInitializeMetadataPointerInstruction,
+  createInitializeMintInstruction,
+  ExtensionType,
+  getAssociatedTokenAddress,
+  getMintLen,
+  LENGTH_SIZE,
+  TOKEN_2022_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+  TYPE_SIZE,
+} from "@solana/spl-token";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { Keypair, SystemProgram, Transaction } from "@solana/web3.js";
+import { createInitializeInstruction, pack } from "@solana/spl-token-metadata";
+import { Atom } from "react-loading-indicators";
 
-import { useState } from 'react'
-import { X } from 'lucide-react';
+import { useState } from "react";
+import { CircleAlert, CircleCheckBig, X } from "lucide-react";
 
 export default function Token({ onClose }) {
-  const [status, setStatus] = useState(0)
-  const [loader, setLoader] = useState(false)
-  const [tokenName, setTokenName] = useState('')
-  const [tokenSymbol, setTokenSymbol] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [initialSupply, setInitialSupply] = useState('')
-  const [isCreating, setIsCreating] = useState(false)
+  const [status, setStatus] = useState("Creating token");
+  const [loader, setLoader] = useState("load");
+  const [tokenName, setTokenName] = useState("");
+  const [tokenSymbol, setTokenSymbol] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [initialSupply, setInitialSupply] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
   const { wallet } = useWallet();
   const { connection } = useConnection();
   async function createToken() {
-    setStatus(1)
+    setStatus("Creating Mint Account...");
     const mintKeypair = Keypair.generate();
     const metadata = {
       mint: mintKeypair.publicKey,
@@ -28,11 +40,13 @@ export default function Token({ onClose }) {
       uri: imageUrl,
       additionalMetadata: [],
     };
-    console.log(mintKeypair.publicKey, metadata)
+    console.log(mintKeypair.publicKey, metadata);
     const mintLen = getMintLen([ExtensionType.MetadataPointer]);
     const metadataLen = TYPE_SIZE + LENGTH_SIZE + pack(metadata).length;
 
-    const lamports = await connection.getMinimumBalanceForRentExemption(mintLen + metadataLen);
+    const lamports = await connection.getMinimumBalanceForRentExemption(
+      mintLen + metadataLen
+    );
     const transaction = new Transaction().add(
       SystemProgram.createAccount({
         fromPubkey: wallet?.adapter.publicKey,
@@ -41,8 +55,19 @@ export default function Token({ onClose }) {
         lamports,
         programId: TOKEN_2022_PROGRAM_ID,
       }),
-      createInitializeMetadataPointerInstruction(mintKeypair.publicKey, wallet?.adapter.publicKey, mintKeypair.publicKey, TOKEN_2022_PROGRAM_ID),
-      createInitializeMintInstruction(mintKeypair.publicKey, 9, wallet?.adapter.publicKey, null, TOKEN_2022_PROGRAM_ID),
+      createInitializeMetadataPointerInstruction(
+        mintKeypair.publicKey,
+        wallet?.adapter.publicKey,
+        mintKeypair.publicKey,
+        TOKEN_2022_PROGRAM_ID
+      ),
+      createInitializeMintInstruction(
+        mintKeypair.publicKey,
+        9,
+        wallet?.adapter.publicKey,
+        null,
+        TOKEN_2022_PROGRAM_ID
+      ),
       createInitializeInstruction({
         programId: TOKEN_2022_PROGRAM_ID,
         mint: mintKeypair.publicKey,
@@ -52,15 +77,17 @@ export default function Token({ onClose }) {
         uri: metadata.uri,
         mintAuthority: wallet?.adapter.publicKey,
         updateAuthority: wallet?.adapter.publicKey,
-      }),
+      })
     );
-    setStatus(2)
+    setStatus("Creating Token.....");
     transaction.feePayer = wallet?.adapter.publicKey;
-    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+    transaction.recentBlockhash = (
+      await connection.getLatestBlockhash()
+    ).blockhash;
     transaction.partialSign(mintKeypair);
 
     await wallet?.adapter.sendTransaction(transaction, connection);
-    setStatus('Associating the Account.....')
+    setStatus("Associating the Account.....");
     const associatedTokenAccount = await getAssociatedTokenAddress(
       mintKeypair.publicKey,
       wallet?.adapter.publicKey,
@@ -77,44 +104,74 @@ export default function Token({ onClose }) {
       )
     );
     transaction.feePayer = wallet?.adapter.publicKey;
-    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-    await wallet?.adapter.sendTransaction(associateTransaction, connection)
-    setStatus(3)
-    console.log(`Token created: ${mintKeypair.publicKey.toBase58()}`);
-    console.log(`Associated Token Account: ${associatedTokenAccount.toBase58()}`);
+    transaction.recentBlockhash = (
+      await connection.getLatestBlockhash()
+    ).blockhash;
+    await wallet?.adapter.sendTransaction(associateTransaction, connection);
+    setStatus("Successfully Token Created");
+    
   }
-  console.log(status)
+  console.log(status);
   const handleCreateToken = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsCreating(true)
-    await createToken()
-    onClose()
-  }
-
+    e.preventDefault();
+    setIsCreating(true);
+    await createToken();
+    setLoader("success");
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-800 bg-opacity-50">
-      {isCreating ?
+      {isCreating ? (
         <div className="lg:w-[40%] w-[50%] rounded-lg bg-black text-white dark:bg-white dark:text-black p-16">
-          <div className='flex justify-between'>
-            <PuffLoader
-              color="#0c0808"
-              cssOverride={{}}
-              size={0}
-              speedMultiplier={1}
-            />
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-100 dark:hover:text-black"><X /></button>
-          </div><p className=" mb-4">Enter the details for your new token</p>
-        </div> :
+          <div className="flex justify-between">
+            <div></div>
+
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-100 dark:hover:text-black"
+            >
+              <X />
+            </button>
+          </div>
+          <div className="flex justify-center">
+            {loader == "success" ? (
+              <div className="flex flex-col items-center gap-5 justify-center">
+                <CircleCheckBig className="w-28 h-28 text-green-700" />
+                <h1 className="font-poppins text-xl text-green-800">
+                  Created Successfully
+                </h1>
+              </div>
+            ) : loader == 'fail'?<div className="flex flex-col items-center gap-5 justify-center">
+            <CircleAlert className="w-28 h-28 text-red-700" />
+            <h1 className="font-poppins text-xl text-red-800">
+              Oops! Something went wrong
+            </h1>
+          </div>:(
+              <Atom color="#151915" size="large" text={status} textColor="" />
+            )}
+          </div>
+        </div>
+      ) : (
         <div className="lg:w-[40%] w-[50%] rounded-lg bg-black text-white dark:bg-white dark:text-black p-16">
-          <div className='flex justify-between'>
-            <h2 className="text-4xl font-poppins font-bold mb-2">Create Solana Token</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-100 dark:hover:text-black"><X /></button>
-          </div><p className=" mb-4">Enter the details for your new token</p>
+          <div className="flex justify-between">
+            <h2 className="text-4xl font-poppins font-bold mb-2">
+              Create Solana Token
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-100 dark:hover:text-black"
+            >
+              <X />
+            </button>
+          </div>
+          <p className=" mb-4">Enter the details for your new token</p>
           <form onSubmit={handleCreateToken}>
             <div className="space-y-4">
               <div>
-                <label htmlFor="tokenName" className="block text-sm font-medium ">
+                <label
+                  htmlFor="tokenName"
+                  className="block text-sm font-medium "
+                >
                   Token Name
                 </label>
                 <input
@@ -129,7 +186,10 @@ export default function Token({ onClose }) {
               </div>
 
               <div>
-                <label htmlFor="tokenSymbol" className="block text-sm font-medium">
+                <label
+                  htmlFor="tokenSymbol"
+                  className="block text-sm font-medium"
+                >
                   Token Symbol
                 </label>
                 <input
@@ -159,7 +219,10 @@ export default function Token({ onClose }) {
               </div>
 
               <div>
-                <label htmlFor="initialSupply" className="block text-sm font-medium ">
+                <label
+                  htmlFor="initialSupply"
+                  className="block text-sm font-medium "
+                >
                   Initial Supply
                 </label>
                 <input
@@ -177,16 +240,17 @@ export default function Token({ onClose }) {
             <div className="mt-6">
               <button
                 type="submit"
-                className={`w-full px-4 py-2 font-bold dark:bg-black bg-white dark:text-white text-black rounded hover:scale-105 transition-all delay-75 ${isCreating ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                className={`w-full px-4 py-2 font-bold dark:bg-black bg-white dark:text-white text-black rounded hover:scale-105 transition-all delay-75 ${
+                  isCreating ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 disabled={isCreating}
               >
-                {isCreating ? 'Creating...' : 'Create Token'}
+                {isCreating ? "Creating..." : "Create Token"}
               </button>
             </div>
           </form>
-        </div>}
-
+        </div>
+      )}
     </div>
-  )
+  );
 }
