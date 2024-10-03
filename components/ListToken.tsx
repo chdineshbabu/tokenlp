@@ -4,11 +4,12 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { TOKEN_2022_PROGRAM_ID, AccountLayout, getTokenMetadata } from '@solana/spl-token';
 import { TokenAccountsFilter } from '@solana/web3.js';
 import { useRouter } from 'next/navigation';
+import Token from './Token';
 
 export default function TokenList() {
     const router = useRouter()
     const [accounts, setAccounts] = useState([]);
-    
+    const [isCreatePop,setIsCreatePop] = useState(false)
     const { wallet } = useWallet();
     const { connection } = useConnection();
     const publicKey = wallet?.adapter.publicKey;
@@ -51,7 +52,11 @@ export default function TokenList() {
 
     return (
         <div className="container mx-auto py-10">
+            <div className='flex justify-between items-end'>
             <h1 className="text-xl font-bold mb-4">Your Token Accounts:</h1>
+            <button onClick={()=>setIsCreatePop(true)} className='p-2 px-4 my-4 bg-black rounded-lg hover:scale-105 transition-all delay-75 dark:bg-white text-white dark:text-black'>Create Token</button>
+                            
+            </div>
             <table className="min-w-full">
                 <thead>
                     <tr>
@@ -85,12 +90,15 @@ export default function TokenList() {
                         <tr>
                             <td colSpan={5} className="border-b py-2 px-4 text-center">
                                 No token accounts found.<br/>
-                                <button className='p-2 px-4 my-4 bg-black rounded-lg hover:scale-105 transition-all delay-75 dark:bg-white text-white dark:text-black'>Create Token</button>
+                                <button onClick={()=>setIsCreatePop(true)} className='p-2 px-4 my-4 bg-black rounded-lg hover:scale-105 transition-all delay-75 dark:bg-white text-white dark:text-black'>Create Token</button>
                             </td>
                         </tr>
                     )}
                 </tbody>
             </table>
+            {isCreatePop && (
+        <Token onClose={()=>setIsCreatePop(false)}/>
+      )}
         </div>
     );
 }
