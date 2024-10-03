@@ -1,7 +1,10 @@
 import React from "react";
 import { ArrowRight, Coins, Zap, Shield } from "lucide-react";
-
-export default function LandingPage({onClose}) {
+interface LandingPageProps {
+    onClose: () => void;
+  }
+  
+  export default function LandingPage({ onClose }: LandingPageProps): JSX.Element {
   return (
     <div className="min-h-screen px-56 bg-gradient-to-b from-gray-900 to-slate-900 text-white">
       <header className="container mx-auto px-4 py-8">
