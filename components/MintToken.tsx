@@ -38,11 +38,17 @@ function MintToken({ mintAddress }: MintTokenProps) {
 
     console.log("Associated Token Account:", associatedTokenAccount.toBase58());
 
+    const mintAmount = parseFloat(mintValue) * 1000000000; // Convert string to number
+    if (isNaN(mintAmount) || mintAmount <= 0) {
+      setStatus("Invalid mint value");
+      return;
+    }
+
     const instruction = createMintToInstruction(
       mintAddress,
       associatedTokenAccount,
       wallet.adapter.publicKey,
-      mintValue * 1000000000, // Assuming decimals
+      mintAmount, // Now it's a valid number
       [],
       TOKEN_2022_PROGRAM_ID
     );
