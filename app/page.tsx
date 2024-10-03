@@ -14,7 +14,7 @@ export default function Home() {
       <WalletProvider wallets={[]} autoConnect>
         <WalletModalProvider>
           {hero ? <LandingPage onClose={() => setHero(false)}/> :
-            <div className="bg-white dark:bg-black transition-all delay-75 text-black dark:text-gray-200 mx-6 lg:mx-96 my-16">
+            <div className=" mx-6 lg:mx-96 my-16">
               <Navbar />
               <Hero />
             </div>}

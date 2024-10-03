@@ -273,7 +273,7 @@ export default function Token({ onClose }: TokenProp): JSX.Element {
 
               <button
                 type="submit"
-                className="w-full inline-flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="w-full inline-flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium bg-white text-black dark:bg-black dark:text-white hover:scale-105 transition-all delay-100"
               >
                 Create Token
               </button>
