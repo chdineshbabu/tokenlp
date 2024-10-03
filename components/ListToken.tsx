@@ -10,7 +10,7 @@ import MintToken from './MintToken';
 
 interface TokenAccount {
   pubkey: string;
-  mint: string; 
+  mint: any; 
   amount: string;
   logo: string;
   name: string;
