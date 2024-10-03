@@ -10,11 +10,13 @@ import { PublicKey, Transaction } from "@solana/web3.js";
 import React, { useState } from "react";
 import { ThreeDot } from "react-loading-indicators";
 import { useRouter } from 'next/navigation';
+
 interface MintTokenProps {
-    mintAddress: PublicKey;
-  }
-  function MintToken({ mintAddress }: MintTokenProps) {
-    const [status, setStatus] = useState('Getting Ready')
+  mintAddress: PublicKey;
+}
+
+function MintToken({ mintAddress }: MintTokenProps) {
+  const [status, setStatus] = useState('Getting Ready');
   const [mintValue, setMintValue] = useState("");
   const [pop, setPop] = useState(false);
   const { wallet } = useWallet();
@@ -22,33 +24,41 @@ interface MintTokenProps {
   const router = useRouter();
 
   async function mintTokens() {
+    if (!wallet?.adapter.publicKey) {
+      setStatus("Error: Wallet not connected");
+      return;
+    }
+
     const associatedTokenAccount = await getAssociatedTokenAddress(
       mintAddress,
-      wallet?.adapter.publicKey,
+      wallet.adapter.publicKey, // Safe now, since it's checked
       false,
       TOKEN_2022_PROGRAM_ID
     );
+
     console.log("Associated Token Account:", associatedTokenAccount.toBase58());
+
     const instruction = createMintToInstruction(
       mintAddress,
       associatedTokenAccount,
-      wallet?.adapter.publicKey,
-      mintValue * 1000000000,
+      wallet.adapter.publicKey,
+      mintValue * 1000000000, // Assuming decimals
       [],
       TOKEN_2022_PROGRAM_ID
     );
-    setStatus("Minting the Tokens.....");
+
+    setStatus("Minting the Tokens...");
     const tokenMintTransaction = new Transaction().add(instruction);
-    await wallet?.adapter.sendTransaction(tokenMintTransaction, connection);
+    await wallet.adapter.sendTransaction(tokenMintTransaction, connection);
   }
+
   const handleCreateToken = async (e: React.FormEvent) => {
     setPop(true);
     e.preventDefault();
     await mintTokens();
     setPop(false);
-    setStatus('Minted Successfully...')
-    router.refresh()
-
+    setStatus('Minted Successfully...');
+    router.refresh();
   };
 
   return (
@@ -61,7 +71,6 @@ interface MintTokenProps {
             <input
               className="w-16"
               type="number"
-              name=""
               placeholder="0"
               value={mintValue}
               onChange={(e) => setMintValue(e.target.value)}
