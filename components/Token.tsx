@@ -31,6 +31,10 @@ export default function Token({ onClose }) {
   const [isCreating, setIsCreating] = useState(false);
   const { wallet } = useWallet();
   const { connection } = useConnection();
+  if (!wallet?.adapter.publicKey) {
+  console.error("Wallet is not connected or publicKey is not available.");
+  return;
+}
   async function createToken() {
     setStatus("Creating Mint Account...");
     const mintKeypair = Keypair.generate();

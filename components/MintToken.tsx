@@ -31,14 +31,14 @@ function MintToken({ mintAddress }: MintTokenProps) {
 
     const associatedTokenAccount = await getAssociatedTokenAddress(
       mintAddress,
-      wallet.adapter.publicKey, // Safe now, since it's checked
+      wallet.adapter.publicKey, 
       false,
       TOKEN_2022_PROGRAM_ID
     );
 
     console.log("Associated Token Account:", associatedTokenAccount.toBase58());
 
-    const mintAmount = parseFloat(mintValue) * 1000000000; // Convert string to number
+    const mintAmount = parseFloat(mintValue) * 1000000000; 
     if (isNaN(mintAmount) || mintAmount <= 0) {
       setStatus("Invalid mint value");
       return;
@@ -48,7 +48,7 @@ function MintToken({ mintAddress }: MintTokenProps) {
       mintAddress,
       associatedTokenAccount,
       wallet.adapter.publicKey,
-      mintAmount, // Now it's a valid number
+      mintAmount, 
       [],
       TOKEN_2022_PROGRAM_ID
     );
