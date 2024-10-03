@@ -8,10 +8,9 @@ import Token from './Token';
 import { Link2Icon } from 'lucide-react';
 import MintToken from './MintToken';
 
-// Define the type for the token account objects
 interface TokenAccount {
   pubkey: string;
-  mint: string; // Change to string because `mint` will likely be converted to base58 (string)
+  mint: string; 
   amount: string;
   logo: string;
   name: string;
@@ -21,14 +20,12 @@ interface TokenAccount {
 export default function TokenList() {
   const router = useRouter();
   
-  // Define the correct type for the accounts state
   const [accounts, setAccounts] = useState<TokenAccount[]>([]);
   const [isCreatePop, setIsCreatePop] = useState(false);
   const { wallet } = useWallet();
   const { connection } = useConnection();
   const publicKey = wallet?.adapter.publicKey;
 
-  // Get metadata of the token mint
   async function getMetadata(mintAddress: any) {
     const metadata = await getTokenMetadata(connection, mintAddress);
     return metadata;
@@ -50,7 +47,7 @@ export default function TokenList() {
           return getMetadata(mintAddress)
             .then((metadata) => ({
               pubkey: account.pubkey.toBase58(),
-              mint: mintAddress.toBase58(),
+              mint: mintAddress,
               amount: accountData.amount.toString(),
               logo: metadata?.uri || '/placeholder.svg',
               name: metadata?.name || 'Token Name',

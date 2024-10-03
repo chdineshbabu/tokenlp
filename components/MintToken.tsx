@@ -6,12 +6,14 @@ import {
   TOKEN_2022_PROGRAM_ID,
 } from "@solana/spl-token";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import React, { useState } from "react";
 import { ThreeDot } from "react-loading-indicators";
 import { useRouter } from 'next/navigation';
-
-function MintToken({ mintAddress }) {
+interface MintTokenProps {
+    mintAddress: PublicKey;
+  }
+  function MintToken({ mintAddress }: MintTokenProps) {
     const [status, setStatus] = useState('Getting Ready')
   const [mintValue, setMintValue] = useState("");
   const [pop, setPop] = useState(false);
